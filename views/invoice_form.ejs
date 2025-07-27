@@ -56,13 +56,17 @@
         <div class="product-row">
           <select name="product_name[]" class="product-select" required>
             <option value="">-- Pilih Produk --</option>
-            <option value="Japanese Wagyu A5 Ribeye Steak Cut">Japanese Wagyu A5 Ribeye Steak Cut</option>
+            <option value="Japanese Wagyu A5 Ribeye Steak Cut 200 gram">Japanese Wagyu A5 Ribeye Steak Cut 200 gram</option>
+            <option value="Japanese Wagyu A5 Ribeye Steak Cut 250 gram">Japanese Wagyu A5 Ribeye Steak Cut 250 gram</option>
+            <option value="Japanese Wagyu A5 Ribeye Steak Cut 300 gram">Japanese Wagyu A5 Ribeye Steak Cut 300 gram</option>
             <option value="Japanese Wagyu A5 Ribeye Yakiniku Cut (200 gr)">Japanese Wagyu A5 Ribeye Yakiniku Cut (200 gr)</option>
             <option value="Japanese Wagyu A5 Ribeye Yakiniku Cut (100 gr)">Japanese Wagyu A5 Ribeye Yakiniku Cut (100 gr)</option>
             <option value="Japanese Wagyu A5 Ribeye Slice Cut (200 gr)">Japanese Wagyu A5 Ribeye Slice Cut (200 gr)</option>
             <option value="Japanese Wagyu A5 Ribeye Slice Cut (100 gr)">Japanese Wagyu A5 Ribeye Slice Cut (100 gr)</option>
 
-            <option value="Japanese Wagyu A5 Sirloin Steak Cut">Japanese Wagyu A5 Sirloin Steak Cut</option>
+            <option value="Japanese Wagyu A5 Sirloin Steak Cut 200 gram">Japanese Wagyu A5 Sirloin Steak Cut 200 gram</option>
+            <option value="Japanese Wagyu A5 Sirloin Steak Cut 250 gram">Japanese Wagyu A5 Sirloin Steak Cut 250 gram</option>
+            <option value="Japanese Wagyu A5 Sirloin Steak Cut 300 gram">Japanese Wagyu A5 Sirloin Steak Cut 300 gram</option>
             <option value="Japanese Wagyu A5 Sirloin Yakiniku Cut (200 gr)">Japanese Wagyu A5 Sirloin Yakiniku Cut (200 gr)</option>
             <option value="Japanese Wagyu A5 Sirloin Yakiniku Cut (100 gr)">Japanese Wagyu A5 Sirloin Yakiniku Cut (100 gr)</option>
             <option value="Japanese Wagyu A5 Sirloin Slice Cut (200 gr)">Japanese Wagyu A5 Sirloin Slice Cut (200 gr)</option>
@@ -108,42 +112,54 @@
       "Japanese Wagyu A5 Shortplate Slice Cut (200 gr)": 199000,
       "Japanese Wagyu A5 Shortplate Slice Cut (100 gr)": 119000,
       "Japanese Wagyu A5 Budget Bundle": 499000,
-      "Japanese Wagyu A5 Slice Bundle": 799000
+      "Japanese Wagyu A5 Slice Bundle": 799000,
+      "Japanese Wagyu A5 Ribeye Steak Cut 200 gram": 560000,
+      "Japanese Wagyu A5 Ribeye Steak Cut 250 gram": 700000,
+      "Japanese Wagyu A5 Ribeye Steak Cut 300 gram": 840000,
+      "Japanese Wagyu A5 Sirloin Steak Cut 200 gram": 560000,
+      "Japanese Wagyu A5 Sirloin Steak Cut 250 gram": 700000,
+      "Japanese Wagyu A5 Sirloin Steak Cut 300 gram": 840000,
       // Steak Cuts and other items are excluded for flexibility
     };
 
-    const productOptions = `
-      <option value="">-- Pilih Produk --</option>
-      ${Object.keys(productPrices).map(p => `<option value="${p}">${p}</option>`).join('')}
-      <option value="Japanese Wagyu A5 Ribeye Steak Cut">Japanese Wagyu A5 Ribeye Steak Cut</option>
-      <option value="Japanese Wagyu A5 Ribeye Yakiniku Cut (200 gr)">Japanese Wagyu A5 Ribeye Yakiniku Cut (200 gr)</option>
-      <option value="Japanese Wagyu A5 Ribeye Yakiniku Cut (100 gr)">Japanese Wagyu A5 Ribeye Yakiniku Cut (100 gr)</option>
-      <option value="Japanese Wagyu A5 Ribeye Slice Cut (200 gr)">Japanese Wagyu A5 Ribeye Slice Cut (200 gr)</option>
-      <option value="Japanese Wagyu A5 Ribeye Slice Cut (100 gr)">Japanese Wagyu A5 Ribeye Slice Cut (100 gr)</option>
-      <option value="Japanese Wagyu A5 Sirloin Steak Cut">Japanese Wagyu A5 Sirloin Steak Cut</option>
-      <option value="Japanese Wagyu A5 Sirloin Yakiniku Cut (200 gr)">Japanese Wagyu A5 Sirloin Yakiniku Cut (200 gr)</option>
-      <option value="Japanese Wagyu A5 Sirloin Yakiniku Cut (100 gr)">Japanese Wagyu A5 Sirloin Yakiniku Cut (100 gr)</option>
-      <option value="Japanese Wagyu A5 Sirloin Slice Cut (200 gr)">Japanese Wagyu A5 Sirloin Slice Cut (200 gr)</option>
-      <option value="Japanese Wagyu A5 Sirloin Slice Cut (100 gr)">Japanese Wagyu A5 Sirloin Slice Cut (100 gr)</option>
-      <option value="Japanese Wagyu A5 Shortplate Slice Cut (200 gr)">Japanese Wagyu A5 Shortplate Slice Cut (200 gr)</option>
-      <option value="Japanese Wagyu A5 Shortplate Slice Cut (100 gr)">Japanese Wagyu A5 Shortplate Slice Cut (100 gr)</option>
-      <option value="Japanese Wagyu A5 Budget Bundle">Japanese Wagyu A5 Budget Bundle</option>
-      <option value="Japanese Wagyu A5 Slice Bundle">Japanese Wagyu A5 Slice Bundle</option>
-      <option value="Ongkir Sameday">Ongkir Sameday</option>
-      <option value="Ongkir Instant">Ongkir Instant</option>
-      <option value="Ongkir Nextday">Ongkir Nextday</option>
-    `;
+  
 
     function addProductRow() {
       const container = document.getElementById('products-container');
       const row = document.createElement('div');
       row.className = 'product-row';
-      row.innerHTML = `
-        <select name="product_name[]" class="product-select" required>${productOptions}</select>
-        <input type="number" name="qty[]" placeholder="Qty" required>
-        <input type="number" name="price[]" placeholder="Harga Satuan" required>
-        <button type="button" onclick="removeRow(this)">Hapus</button>
-      `;
+
+      // Clone the first select element
+      const firstSelect = document.querySelector('.product-select');
+      const newSelect = firstSelect.cloneNode(true);
+      newSelect.name = "product_name[]";
+      newSelect.required = true;
+
+      // Create the other inputs and button
+      const qtyInput = document.createElement('input');
+      qtyInput.type = 'number';
+      qtyInput.name = 'qty[]';
+      qtyInput.placeholder = 'Qty';
+      qtyInput.required = true;
+
+      const priceInput = document.createElement('input');
+      priceInput.type = 'number';
+      priceInput.name = 'price[]';
+      priceInput.placeholder = 'Harga Satuan';
+      priceInput.required = true;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.textContent = 'Hapus';
+      deleteBtn.onclick = () => removeRow(deleteBtn);
+
+      // Append all to row
+      row.appendChild(newSelect);
+      row.appendChild(qtyInput);
+      row.appendChild(priceInput);
+      row.appendChild(deleteBtn);
+
+      // Add to container
       container.appendChild(row);
     }
 
