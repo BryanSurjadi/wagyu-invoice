@@ -100,6 +100,18 @@
       <label>Jumlah Diskon (Rp)</label>
       <input type="number" name="discount_amount" placeholder="Contoh: 50000">
 
+      <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" id="btnPreviewNote">Preview Note</button>
+        <button type="button" id="btnCopyNote">Copy Note</button>
+        <button type="button" id="btnOpenNote">Open Note in New Tab</button>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <label style="display:block; margin-bottom:6px;">Preview / Copy Text</label>
+        <textarea id="noteText" rows="8" style="width:100%; font-family:monospace;"></textarea>
+      </div>
+
+
       <button type="submit">Generate Invoice PDF</button>
     </form>
   </main>
@@ -202,6 +214,107 @@
         autofillPrice(e.target);
       }
     });
+
+     const productAlias = {
+      "Japanese Wagyu A5 Ribeye Yakiniku Cut (200 gr)": "Ribeye kotak kotak 200 gram",
+      "Japanese Wagyu A5 Ribeye Yakiniku Cut (100 gr)": "Ribeye kotak kotak 100 gram",
+      "Japanese Wagyu A5 Ribeye Slice Cut (200 gr)": "Ribeye gulung 200 gram",
+      "Japanese Wagyu A5 Ribeye Slice Cut (100 gr)": "Ribeye gulung 100 gram",
+      "Japanese Wagyu A5 Sirloin Yakiniku Cut (200 gr)": "Sirloin kotak kotak 200 gram",
+      "Japanese Wagyu A5 Sirloin Yakiniku Cut (100 gr)": "Sirloin kotak kotak 100 gram",
+      "Japanese Wagyu A5 Sirloin Slice Cut (200 gr)": "Sirloin gulung 200 gram",
+      "Japanese Wagyu A5 Sirloin Slice Cut (100 gr)": "Sirloin gulung 100 gram",
+      "Japanese Wagyu A5 Slice Bundle": "Sirloin gulung 100 gram 3 pack",
+      "Japanese Wagyu A5 Ribeye Steak Cut 200 gram": "Ribeye tebel 200 gram",
+      "Japanese Wagyu A5 Ribeye Steak Cut 250 gram": "Ribeye tebel 250 gram",
+      "Japanese Wagyu A5 Ribeye Steak Cut 300 gram": "Ribeye tebel 300 gram",
+      "Japanese Wagyu A5 Sirloin Steak Cut 200 gram": "Sirloin tebel 200 gram",
+      "Japanese Wagyu A5 Sirloin Steak Cut 250 gram": "Sirloin tebel 250 gram",
+      "Japanese Wagyu A5 Sirloin Steak Cut 300 gram": "Sirloin tebel 300 gram",
+      "Japanese Wagyu A5 Steak Combo 1": "2 pack Sirloin tebel 200 gram",
+      "Japanese Wagyu A5 Steak Combo 2": "2 pack Sirloin tebel 250 gram",
+      "Japanese Wagyu A5 Weekend Special": "3 pack Sirloin tebel 200 gram + 1 pack Sirloin gulung 200 gram",
+      "Japanese Wagyu A5 Mixed Combo": "1 pack Sirloin tebel 200 gram + 1 pack Sirloin gulung 200 gram",
+    };
+
+    function buildAliasText() {
+      const container = document.getElementById('products-container');
+      const rows = container.querySelectorAll('.product-row');
+
+      // alias → total qty
+      const map = new Map();
+
+      rows.forEach(row => {
+        const sel = row.querySelector('.product-select');
+        const qtyEl = row.querySelector('input[name="qty[]"]');
+
+        const name = (sel?.value || '').trim();
+        const qty = Number(qtyEl?.value || 0);
+        if (!name || qty <= 0) return;
+
+        const alias = (productAlias[name] || name).trim();
+        map.set(alias, (map.get(alias) || 0) + qty);
+      });
+
+      // Build lines (sorted for consistent output)
+      const lines = [];
+      Array.from(map.entries())
+        .sort(([a],[b]) => a.localeCompare(b))
+        .forEach(([alias, qty]) => {
+          // If alias already contains the word "pack", avoid "pack pack"
+          const hasPackWord = /(^|\s)pack(\s|$)/i.test(alias);
+          const prefix = hasPackWord ? `${qty} x` : `${qty} pack`;
+          lines.push(`${prefix} ${alias.toLowerCase()}`);
+        });
+
+      // Shipping footer: "<Carrier> atas nama <Customer>"
+      const opsi = document.getElementById('opsi_pengiriman')?.value || '';
+      const customer = document.querySelector('input[name="customer_name"]')?.value || '';
+      const carrier = (opsi.split(' ')[0] || opsi).trim(); // "Gosend"/"Paxel"/etc.
+
+      if (carrier || customer) {
+        lines.push('');
+        lines.push(`${carrier} atas nama ${customer}`.trim());
+      }
+      lines.push(''); // blank line before the bar (optional)
+      lines.push('===================');
+      return lines.join('\n');
+    }
+
+    // Buttons
+    document.getElementById('btnPreviewNote')?.addEventListener('click', () => {
+      document.getElementById('noteText').value = buildAliasText();
+    });
+
+    document.getElementById('btnCopyNote')?.addEventListener('click', async () => {
+      const text = document.getElementById('noteText').value || buildAliasText();
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Copied!');
+      } catch {
+        // Fallback for older browsers
+        const ta = document.getElementById('noteText');
+        ta.value = text;
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        alert('Copied!');
+      }
+    });
+
+    document.getElementById('btnOpenNote')?.addEventListener('click', () => {
+      const text = document.getElementById('noteText').value || buildAliasText();
+      const w = window.open('about:blank', '_blank');
+      if (w) {
+        const escaped = text
+          .replace(/&/g,'&amp;')
+          .replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;');
+        w.document.write(`<pre style="font-family:monospace; white-space:pre-wrap; line-height:1.4">${escaped}</pre>`);
+        w.document.close();
+      }
+    });
+
   </script>
 </body>
 </html>
